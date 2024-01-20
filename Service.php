@@ -2,6 +2,7 @@
 
 namespace App\Services\DiscordHook;
 
+use Illuminate\Support\Facades\Http;
 use App\Services\ServiceInterface;
 use App\Models\Package;
 use App\Models\Order;
@@ -47,7 +48,22 @@ class Service implements ServiceInterface
      */
     public static function setConfig(): array
     {
-        return [];
+        return [
+            [
+                "key" => "discordhook::webhook_url",
+                "name" => "Webhook URL",
+                "description" => "Enter the webhook url to send the message to",
+                "type" => "text",
+                "rules" => ['required', 'active_url'], // laravel validation rules
+            ],
+            [
+                "key" => "discordhook::username",
+                "name" => "Username",
+                "description" => "Enter the username of the webhook sender",
+                "type" => "text",
+                "rules" => ['required'], // laravel validation rules
+            ],
+        ];
     }
 
     /**
@@ -60,7 +76,15 @@ class Service implements ServiceInterface
      */
     public static function setPackageConfig(Package $package): array
     {
-        return [];
+        return [
+            [
+                "key" => "discord_role_id",
+                "name" => "Discord Role ID",
+                "description" => "Enter the ID of the role to give to the user",
+                "type" => "number",
+                "rules" => ['required', 'numeric'],
+            ],
+        ];
     }
 
     /**
@@ -73,7 +97,15 @@ class Service implements ServiceInterface
      */
     public static function setCheckoutConfig(Package $package): array
     {
-        return [];
+        return [
+            [
+                "key" => "discord_user_id",
+                "name" => "Discord User ID",
+                "description" => "Please enter your discord user ID",
+                "type" => "number",
+                "rules" => ['required', 'numeric'],
+            ],
+        ];
     }
 
     /**
@@ -94,20 +126,15 @@ class Service implements ServiceInterface
      */
     public function create(array $data = [])
     {
-        return [];
-    }
+        $order = $this->order;
+        $package = $order->package;
 
-    /**
-     * This function is responsible for upgrading or downgrading
-     * an instance of this service. This method is optional
-     * If your service doesn't support upgrading, remove this method.
-     * 
-     * Optional
-     * @return void
-    */
-    public function upgrade(Package $oldPackage, Package $newPackage)
-    {
-        return [];
+        $webhookUrl = settings('discordhook::webhook_url');
+
+        $response = Http::post($webhookUrl, [
+            'username' => settings('discordhook::username'),
+            'content' => "New order created for {$order->user->username} for package {$package->name}, the user id is {$order->options['discord_user_id']}",
+        ]);
     }
 
     /**
@@ -119,7 +146,15 @@ class Service implements ServiceInterface
     */
     public function suspend(array $data = [])
     {
-        return [];
+        $order = $this->order;
+        $package = $order->package;
+
+        $webhookUrl = settings('discordhook::webhook_url');
+
+        $response = Http::post($webhookUrl, [
+            'username' => settings('discordhook::username'),
+            'content' => "Order has been suspended for {$order->user->username} for package {$package->name}, the user id is {$order->options['discord_user_id']}",
+        ]);
     }
 
     /**
@@ -131,7 +166,15 @@ class Service implements ServiceInterface
     */
     public function unsuspend(array $data = [])
     {
-        return [];
+        $order = $this->order;
+        $package = $order->package;
+
+        $webhookUrl = settings('discordhook::webhook_url');
+
+        $response = Http::post($webhookUrl, [
+            'username' => settings('discordhook::username'),
+            'content' => "Order has been unsuspended for {$order->user->username} for package {$package->name}, the user id is {$order->options['discord_user_id']}",
+        ]);
     }
 
     /**
@@ -142,7 +185,14 @@ class Service implements ServiceInterface
     */
     public function terminate(array $data = [])
     {
-        return [];
-    }
+        $order = $this->order;
+        $package = $order->package;
 
+        $webhookUrl = settings('discordhook::webhook_url');
+
+        $response = Http::post($webhookUrl, [
+            'username' => settings('discordhook::username'),
+            'content' => "Order has been terminated for {$order->user->username} for package {$package->name}, the user id is {$order->options['discord_user_id']}",
+        ]);
+    }
 }
