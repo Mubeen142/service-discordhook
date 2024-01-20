@@ -1,0 +1,11 @@
+{
+    "name": "DiscordHook",
+    "alias": "discordhook",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "App\\Services\\DiscordHook\\Providers\\DiscordHookServiceProvider"
+    ],
+    "files": []
+}
